@@ -94,7 +94,7 @@
 	<script>
 	$(".search-text").bind("keyup", function(){
 		var searchText = $(this).val();
-        $.get("/video/imooc/js/search_box/query.php?q=" + searchText, function(data) {
+        $.get("/query.php?q=" + searchText, function(data) {
             var htmlText = "";
             for (var i = 0; i < data.length; i++) {
                 htmlText += "<li>"+data[i]+"</li>";
