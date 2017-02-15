@@ -15,7 +15,7 @@
 		}
 		div.search-box {
 			position: absolute;
-			top: 150px;
+			top: 100px;
 			left: 200px;
 		}
 		div.search-logo {
@@ -80,6 +80,7 @@
 		<div class="search-logo"></div>
         <!-- action="http://cn.bing.com/search?q=" -->
 		<form class="search-form">
+            <input style="display:none" />
 			<input type="text" class="search-text" autocomplete="off" />
 			<input type="button" class="search-button" value="" />
 		</form>
@@ -95,7 +96,8 @@
     <!-- 搜索query提示 -->
 	<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 	<script>
-	$(".search-text").bind("keyup", function(){
+    // 提示
+	$(".search-text").bind("keyup", function() {
 		var searchText = $(this).val();
         $.get("/suggest.php?q=" + searchText, function(data) {
             var htmlText = "";
@@ -110,12 +112,15 @@
 		    });
         }, "json");
 	});
+    // 取消提示
     $(document).bind("click", function() {
         $(".suggest").hide(); 
     });
+    // 选择提示词
     $(document).delegate("li", "click", function() {
         var keyword = $(this).text();
-        location.href = "https://www.baidu.com/s?wd=" + keyword; 
+        $(".search-text").val(keyword);
+        startSearch();
     });
 	</script>
 
@@ -167,6 +172,14 @@
     <!-- 启动查询 -->
     <script>
     $(".search-button").bind("click", function() {
+        startSearch(); 
+    });
+    $(".search-text").bind("keydown", function() {
+        if (event.keyCode == 13) {
+            startSearch();
+        }
+    });
+    function startSearch() {
         query = $(".search-text").val()
         var postData = {
             q: query
@@ -188,7 +201,7 @@
             myChart.setOption(option);
             //console.log(option);
         }); 
-    });
+    };
     </script>
 </body>
 </html>
