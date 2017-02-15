@@ -86,11 +86,7 @@
 		</form>
 	</div>
 	<div class="suggest" id="search-suggest" style="display:none;">
-		<ul>
-			<li>苹果</li>
-			<li>香蕉</li>
-			<li>橘子</li>
-		</ul>
+		<ul></ul>
 	</div>
 
     <!-- 搜索query提示 -->
@@ -98,6 +94,9 @@
 	<script>
     // 提示
 	$(".search-text").bind("keyup", function() {
+        if (event.keyCode == 13) {
+            return;
+        }
 		var searchText = $(this).val();
         $.get("/suggest.php?q=" + searchText, function(data) {
             var htmlText = "";
@@ -129,7 +128,7 @@
     <script src="http://cdn.bootcss.com/echarts/2.2.7/echarts-all.js"></script>
     <script type="text/javascript">
     // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('main'));
+    //var myChart = echarts.init(document.getElementById('main'));
 
     function createRandomItemStyle() {
         return {
@@ -180,7 +179,9 @@
         }
     });
     function startSearch() {
-        query = $(".search-text").val()
+        query = $(".search-text").val();
+        $(".search-text").val('');
+		$(".suggest").hide();
         var postData = {
             q: query
         };
@@ -197,7 +198,9 @@
                 option.series[0].data.push(item);
             }
 
+            console.log(option.series[0].data);
             // echarts出图
+            var myChart = echarts.init(document.getElementById('main'));
             myChart.setOption(option);
             //console.log(option);
         }); 
