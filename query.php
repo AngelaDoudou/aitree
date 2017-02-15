@@ -42,7 +42,7 @@ $result = [];
 foreach ($queryArray as $key => $value) {
     $result[] = array(
         "tag" => $value,
-        "score" => rand(0, 100),
+        "score" => rand(1, 99),
     ); 
 }
 
