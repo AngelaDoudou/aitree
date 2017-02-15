@@ -15,7 +15,7 @@
 		}
 		div.search-box {
 			position: absolute;
-			top: 150px;
+			top: 100px;
 			left: 200px;
 		}
 		div.search-logo {
@@ -78,9 +78,11 @@
     <!-- 搜索框 -->
 	<div class="search-box">
 		<div class="search-logo"></div>
-		<form class="search-form" action="http://cn.bing.com/search?q=" target="_blank">
-			<input type="text" class="search-text" name="q" autocomplete="off" />
-			<input type="submit" class="search-button" value="" />
+        <!-- action="http://cn.bing.com/search?q=" -->
+		<form class="search-form">
+            <input style="display:none" />
+			<input type="text" class="search-text" autocomplete="off" />
+			<input type="button" class="search-button" value="" />
 		</form>
 	</div>
 	<div class="suggest" id="search-suggest" style="display:none;">
@@ -90,11 +92,14 @@
 			<li>橘子</li>
 		</ul>
 	</div>
+
+    <!-- 搜索query提示 -->
 	<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 	<script>
-	$(".search-text").bind("keyup", function(){
+    // 提示
+	$(".search-text").bind("keyup", function() {
 		var searchText = $(this).val();
-        $.get("/query.php?q=" + searchText, function(data) {
+        $.get("/suggest.php?q=" + searchText, function(data) {
             var htmlText = "";
             for (var i = 0; i < data.length; i++) {
                 htmlText += "<li>"+data[i]+"</li>";
@@ -107,12 +112,15 @@
 		    });
         }, "json");
 	});
+    // 取消提示
     $(document).bind("click", function() {
         $(".suggest").hide(); 
     });
+    // 选择提示词
     $(document).delegate("li", "click", function() {
         var keyword = $(this).text();
-        location.href = "https://www.baidu.com/s?wd=" + keyword; 
+        $(".search-text").val(keyword);
+        startSearch();
     });
 	</script>
 
@@ -120,66 +128,80 @@
     <div id="main" class="word-cloud-box"></div>
     <script src="http://cdn.bootcss.com/echarts/2.2.7/echarts-all.js"></script>
     <script type="text/javascript">
-        // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('main'));
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
 
-        function createRandomItemStyle() {
-            return {
-                normal: {
-                    color: 'rgb(' + [
-                        Math.round(Math.random() * 160),
-                        Math.round(Math.random() * 160),
-                        Math.round(Math.random() * 160)
-                    ].join(',') + ')'
-                }
-            };
-        }
-
-        // 指定图表的配置项和数据
-        option = {
-            title: {
-                text: '小米是雷军的公司',
-                link: ''
-            },
-            tooltip: {
-                show: true  // 鼠标放置到word上会提示具体数据
-            },
-            series: [{
-                name: '',
-                type: 'wordCloud',
-                size: ['80%', '80%'],
-                textRotation : [0, 45, 90, -45],
-                textPadding: 0,
-                autoSize: {
-                    enable: true,
-                    minSize: 14
-                },
-                data: [
-                    {
-                        name: "科技",
-                        value: 91.7,
-                        itemStyle: createRandomItemStyle()
-                    },
-                    {
-                        name: "名人",
-                        value: 60.1,
-                        itemStyle: createRandomItemStyle()
-                    },
-                    {
-                        name: "手机",
-                        value: 48.6,
-                        itemStyle: createRandomItemStyle()
-                    },
-                    {
-                        name: "智能",
-                        value: 25.3,
-                        itemStyle: createRandomItemStyle()
-                    }
-                ]
-            }]
+    function createRandomItemStyle() {
+        return {
+            normal: {
+                color: 'rgb(' + [
+                    Math.round(Math.random() * 160),
+                    Math.round(Math.random() * 160),
+                    Math.round(Math.random() * 160)
+                ].join(',') + ')'
+            }
         };
-        // 使用刚指定的配置项和数据显示图表。
-        myChart.setOption(option);
+    }
+
+    // 指定图表的配置项和数据
+    option = {
+        title: {
+            text: '',
+            link: ''
+        },
+        tooltip: {
+            show: true  // 鼠标放置到word上会提示具体数据
+        },
+        series: [{
+            name: '',
+            type: 'wordCloud',
+            size: ['80%', '80%'],
+            textRotation : [0, 45, 90, -45],
+            textPadding: 0,
+            autoSize: {
+                enable: true,
+                minSize: 14
+            },
+            data: []
+        }]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    //myChart.setOption(option);
+    </script>
+
+    <!-- 启动查询 -->
+    <script>
+    $(".search-button").bind("click", function() {
+        startSearch(); 
+    });
+    $(".search-text").bind("keydown", function() {
+        if (event.keyCode == 13) {
+            startSearch();
+        }
+    });
+    function startSearch() {
+        query = $(".search-text").val()
+        var postData = {
+            q: query
+        };
+        $.post("/query.php", postData, function(data) {
+            data = JSON.parse(data); 
+            option.title.text = query;
+            option.series[0].data = [];
+            for (var i = 0; i < data.length; i++) {
+                item = {
+                    name: data[i].tag,
+                    value: data[i].score,
+                    itemStyle: createRandomItemStyle()
+                };
+                option.series[0].data.push(item);
+            }
+
+            // echarts出图
+            myChart.setOption(option);
+            //console.log(option);
+        }); 
+    };
     </script>
 </body>
 </html>
