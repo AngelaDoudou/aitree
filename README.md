@@ -13,4 +13,11 @@ $ cd build
 $ ./sr_segment
 ```
 
+## 说明
+
+需要增加结巴分词库的软链接
+
+```
+$ ln -s /home/angela/git/cppjieba cppjieba
+```
 
